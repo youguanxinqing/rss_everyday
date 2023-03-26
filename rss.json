@@ -1,56 +1,32 @@
 {
   "rss_info": [
     {
-      "title": "少数派",
-      "url": "https://sspai.com/feed"
-    },
-    {
-      "title": "阮一峰的网络日志",
-      "url": "http://feeds.feedburner.com/ruanyifeng"
-    },
-    {
       "title": "酷壳 coolshell",
       "url": "https://coolshell.cn/feed"
     },
     {
-      "title": "依云's Blog",
-      "url": "https://blog.lilydjwg.me/feed"
+      "title": "Randy's Blog",
+      "url": "https://lutaonan.com/rss.xml"
     },
     {
-      "title": "Winnie 散漫游",
-      "url": "https://winnielife.com/feed/"
+      "title": "程序员的喵",
+      "url": "https://catcoding.me/atom.xml"
     },
     {
-      "title": "Airing 的小屋",
-      "url": "https://me.ursb.me/feed"
+      "title": "渚碧",
+      "url": "https://jubeny.com/feed.xml"
     },
     {
-      "title": "少数派 matrix",
-      "url": "https://rsshub.app/sspai/matrix"
+      "title": "岁寒",
+      "url": "https://lvwenhan.com/rss.php"
     },
     {
-      "title": "五月天微博",
-      "url": "https://rsshub.app/weibo/user/3365597502"
+      "title": "卡瓦邦噶！",
+      "url": "https://www.kawabangga.com/feed"
     },
     {
-      "title": "阿信微博",
-      "url": "https://rsshub.app/weibo/user/1265020392"
-    },
-    {
-      "title": "Product Hunt",
-      "url": "https://www.producthunt.com/feed"
-    },
-    {
-      "title": "I'm TualatriX",
-      "url": "https://imtx.me/feed/latest/"
-    },
-    {
-      "title": "贤民的比特回忆",
-      "url": "https://www.xianmin.org/index.xml"
-    },
-    {
-      "title": "茶歇驿站",
-      "url": "https://maiyang.me/index.xml"
+      "title": "plantegg",
+      "url": "https://plantegg.github.io/atom.xml"
     }
   ]
 }
