@@ -63,6 +63,10 @@
     {
       "title": "美团技术团队",
       "url": "https://tech.meituan.com/feed/"
+    },
+    {
+      "title": "The Go Blog",
+      "url": "https://go.dev/blog/feed.atom"
     }
   ]
 }
