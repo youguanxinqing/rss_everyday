@@ -59,6 +59,10 @@
     {
       "title": "酷壳 coolshell",
       "url": "https://coolshell.cn/feed"
+    },
+    {
+      "title": "美团技术团队",
+      "url": "https://tech.meituan.com/feed/"
     }
   ]
 }
