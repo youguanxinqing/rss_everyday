@@ -1,10 +1,6 @@
 {
   "rss_info": [
     {
-      "title": "酷壳 coolshell",
-      "url": "https://coolshell.cn/feed"
-    },
-    {
       "title": "Randy's Blog",
       "url": "https://lutaonan.com/rss.xml"
     },
@@ -13,20 +9,56 @@
       "url": "https://catcoding.me/atom.xml"
     },
     {
-      "title": "渚碧",
-      "url": "https://jubeny.com/feed.xml"
+      "title": "hmgle's blog",
+      "url": "https://hmgle.github.io/feed.xml"
+    },
+    {
+      "title": "CFC4N",
+      "url": "https://www.cnxct.com/feed/"
+    },
+    {
+      "title": "brr",
+      "url": "https://brr.fyi/feed.xml"
     },
     {
       "title": "岁寒",
       "url": "https://lvwenhan.com/rss.php"
     },
     {
+      "title": "面向信仰编程",
+      "url": "https://draveness.me/feed.xml"
+    },
+    {
       "title": "卡瓦邦噶！",
       "url": "https://www.kawabangga.com/feed"
     },
     {
+      "title": "codedump",
+      "url": "https://www.codedump.info/index.xml"
+    },
+    {
       "title": "plantegg",
       "url": "https://plantegg.github.io/atom.xml"
+    },
+    {
+      "title": "奇伢",
+      "url": "https://www.qiyacloud.cn/index.xml"
+    },
+    {
+      "title": "No Headback",
+      "url": "https://xargin.com/rss/"
+    },
+    {
+      "title": "Changkun's Blog",
+      "url": "https://changkun.de/blog/index.xml"
+    },
+    {
+      "title": "渚碧",
+      "url": "https://jubeny.com/feed.xml"
+    },
+    {
+      "title": "酷壳 coolshell",
+      "url": "https://coolshell.cn/feed"
     }
   ]
 }
