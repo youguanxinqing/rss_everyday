@@ -70,7 +70,7 @@ func GetRssInfo() {
 
 // 根据时间筛选昨天一整天的文章
 func GetPosts() {
-	msgList := make([]string, 0)
+	msgList := make([]*gofeed.Item, 0)
 	for _, info := range RssInfos.RssInfo {
 		msgList = append(msgList, GetPostInfo(info)...)
 	}
@@ -99,8 +99,8 @@ func getDatetime(times ...*time.Time) *time.Time {
 	return times[len(times)-1]
 }
 
-func GetPostInfo(rss RssInfo) []string {
-	var msg = make([]string, 0)
+func GetPostInfo(rss RssInfo) []*gofeed.Item {
+	var msg = make([]*gofeed.Item, 0)
 
 	now := time.Now().UTC()
 	startTime := now.Add(-(time.Duration(*StartBy) * time.Hour))
@@ -117,8 +117,7 @@ func GetPostInfo(rss RssInfo) []string {
 
 			parseDatetime := getDatetime(item.PublishedParsed, item.UpdatedParsed)
 			if parseDatetime != nil && parseDatetime.Unix() >= start && parseDatetime.Unix() < end {
-				msgItem := fmt.Sprintln(item.Title, item.Link)
-				msg = append(msg, msgItem)
+				msg = append(msg, item)
 			}
 		}
 	}
@@ -126,15 +125,25 @@ func GetPostInfo(rss RssInfo) []string {
 	return msg
 }
 
-func logEveryArticle(msgList []string) {
+func logEveryArticle(msgList []*gofeed.Item) {
 	for _, msg := range msgList {
-		log.Printf("%s", msg)
+		info := fmt.Sprintln(msg.Title, msg.Link)
+		log.Printf("%s", info)
 	}
+}
+
+func makeDisplayMsg(item *gofeed.Item) string {
+	return fmt.Sprintf(
+		"%s\n%s\n%s",
+		item.Author,
+		item.Title,
+		item.Link,
+	)
 }
 
 // 从配置文件获取推送方式
 // 使用对应的推送渠道推送文章
-func PushPost(msgList []string) {
+func PushPost(msgList []*gofeed.Item) {
 	logEveryArticle(msgList)
 
 	// directly return if debug mode
@@ -147,7 +156,8 @@ func PushPost(msgList []string) {
 		panic(err)
 	}
 	for _, s := range msgList {
-		_, _ = bot.Send(tgbotapi.NewMessage(*ChannelID, s))
+		displayMsg := makeDisplayMsg(s)
+		_, _ = bot.Send(tgbotapi.NewMessage(*ChannelID, displayMsg))
 	}
 }
 
