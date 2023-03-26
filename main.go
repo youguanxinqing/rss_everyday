@@ -132,10 +132,17 @@ func logEveryArticle(msgList []*gofeed.Item) {
 	}
 }
 
+func safeExtractName(author *gofeed.Person) string {
+	if author == nil {
+		return ""
+	}
+	return fmt.Sprintf("%s\n", author.Name)
+}
+
 func makeDisplayMsg(item *gofeed.Item) string {
 	return fmt.Sprintf(
-		"%s\n%s\n%s",
-		item.Author,
+		"%s%s\n%s",
+		safeExtractName(item.Author),
 		item.Title,
 		item.Link,
 	)
