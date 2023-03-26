@@ -17,4 +17,4 @@ jobs:
     - name: Checkout code
       uses: actions/checkout@v2
     - name: build
-      run: go run main.go -tg-bot=${{secrets.BOTTOKEN}} -tg-channel=${{secrets.CHANNELID}} -startby $((24*60))
+      run: go run main.go -tg-bot=${{secrets.BOTTOKEN}} -tg-channel=${{secrets.CHANNELID}} -startby=$((24*60))
