@@ -2,7 +2,7 @@ name: RSS Everyday
 on: 
   workflow_dispatch:
   schedule:
-    - cron: '0 */4 * * *'
+    - cron: '0 */3 * * *'
 #env:
 #  TZ: Asia/Shanghai
 
@@ -17,4 +17,4 @@ jobs:
     - name: Checkout code
       uses: actions/checkout@v2
     - name: build
-      run: go run main.go -tg-bot=${{secrets.BOTTOKEN}} -tg-channel=${{secrets.CHANNELID}}
+      run: go run main.go -tg-bot=${{secrets.BOTTOKEN}} -tg-channel=${{secrets.CHANNELID}} -goroutine-num 10

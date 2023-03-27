@@ -1,12 +1,14 @@
 package main
 
 import (
+	"context"
 	"encoding/json"
 	"flag"
 	"fmt"
 	"log"
 	"os"
 	"strings"
+	"sync"
 	"time"
 
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api/v5"
@@ -15,11 +17,12 @@ import (
 
 // 基础环境配置
 var (
-	BotToken    *string
-	ChannelID   *int64
-	StartBy     *int64
-	RSSFilePath *string
-	DebugMode   *bool
+	BotToken     *string
+	ChannelID    *int64
+	StartBy      *int64
+	RSSFilePath  *string
+	DebugMode    *bool
+	GoroutineNum *int
 )
 
 func TokenValid() {
@@ -31,9 +34,10 @@ func TokenValid() {
 func init() {
 	BotToken = flag.String("tg-bot", "", "Telegram bot token")
 	ChannelID = flag.Int64("tg-channel", 0, "Telegram channel id")
-	StartBy = flag.Int64("startby", 4, "Start by specified time(hour)")
+	StartBy = flag.Int64("startby", 3, "Start by specified time(hour)")
 	RSSFilePath = flag.String("rss-filepath", "rss.json", "Rss json file path")
 	DebugMode = flag.Bool("debug", false, "Debug mode")
+	GoroutineNum = flag.Int("goroutine-num", 5, "Goroutine num")
 	flag.Parse()
 
 	TokenValid()
@@ -68,13 +72,34 @@ func GetRssInfo() {
 
 }
 
+var (
+	// 订阅 chan
+	infoChan = make(chan RssInfo, 20)
+	// 通知 tg chan
+	tgChan = make(chan *gofeed.Item, 20)
+)
+
 // 根据时间筛选昨天一整天的文章
-func GetPosts() {
-	msgList := make([]*gofeed.Item, 0)
+func InfoProducer(_ context.Context) {
+	defer func() {
+		close(infoChan)
+	}()
+
 	for _, info := range RssInfos.RssInfo {
-		msgList = append(msgList, GetPostInfo(info)...)
+		infoChan <- info
 	}
-	PushPost(msgList)
+}
+
+func InfoComsumer(_ context.Context, done func()) {
+	defer done()
+
+	for info := range infoChan {
+		feeds := GetPostInfo(info)
+		// 发给 tg
+		for _, feed := range feeds {
+			tgChan <- feed
+		}
+	}
 }
 
 func debugInfof(fmt string, v ...interface{}) {
@@ -125,13 +150,6 @@ func GetPostInfo(rss RssInfo) []*gofeed.Item {
 	return msg
 }
 
-func logEveryArticle(msgList []*gofeed.Item) {
-	for _, msg := range msgList {
-		info := fmt.Sprintln(msg.Title, msg.Link)
-		log.Printf("%s", info)
-	}
-}
-
 func safeExtractName(author *gofeed.Person) string {
 	if author == nil {
 		return ""
@@ -148,26 +166,75 @@ func makeDisplayMsg(item *gofeed.Item) string {
 	)
 }
 
+var (
+	bot        *tgbotapi.BotAPI
+	onceLoader sync.Once
+)
+
 // 从配置文件获取推送方式
 // 使用对应的推送渠道推送文章
-func PushPost(msgList []*gofeed.Item) {
-	logEveryArticle(msgList)
+func PushPost(ctx context.Context, done func()) {
+	defer done()
 
-	// directly return if debug mode
-	if *DebugMode {
-		return
+	// init bot instance
+	onceLoader.Do(func() {
+		if !*DebugMode {
+			var err error
+			bot, err = tgbotapi.NewBotAPI(*BotToken)
+			if err != nil {
+				panic(err)
+			}
+		}
+	})
+
+	cnt := 0
+	for feed := range tgChan {
+		info := fmt.Sprintln(feed.Title, feed.Link)
+		log.Printf("%s", info)
+
+		// do not send tg when is debug mode
+		if *DebugMode {
+			continue
+		}
+
+		displayMsg := makeDisplayMsg(feed)
+		if _, err := bot.Send(tgbotapi.NewMessage(*ChannelID, displayMsg)); err != nil {
+			log.Printf("send tg err: %v\n", err)
+		}
+
+		cnt++
+		if cnt%10 == 0 {
+			time.Sleep(2 * time.Second)
+		}
 	}
 
-	bot, err := tgbotapi.NewBotAPI(*BotToken)
-	if err != nil {
-		panic(err)
-	}
-	for _, s := range msgList {
-		displayMsg := makeDisplayMsg(s)
-		_, _ = bot.Send(tgbotapi.NewMessage(*ChannelID, displayMsg))
+	// send beat package when no new msg
+	if cnt == 0 {
+		if _, err := bot.Send(tgbotapi.NewMessage(*ChannelID, "😆only beat package, no new msg")); err != nil {
+			log.Printf("send beat err: %v\n", err)
+		}
 	}
 }
 
 func main() {
-	GetPosts()
+
+	ctx, cancel := context.WithCancel(context.Background())
+	// PushPost
+	go PushPost(ctx, cancel)
+
+	// rss feed 订阅生产者
+	go InfoProducer(context.Background())
+	// rss feed 订阅的消费者
+	var wg sync.WaitGroup
+	wg.Add(*GoroutineNum)
+	for i := 0; i < *GoroutineNum; i++ {
+		go InfoComsumer(context.TODO(), wg.Done)
+	}
+	wg.Wait()
+
+	log.Println("close tg chan")
+	close(tgChan)
+	log.Println("waiting for done")
+	<-ctx.Done()
+	log.Println("done ...")
 }
