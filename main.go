@@ -1,7 +1,9 @@
 package main
 
 import (
+	"RSS_bot/internal/dedup"
 	"context"
+	"crypto/md5"
 	"encoding/json"
 	"flag"
 	"fmt"
@@ -23,6 +25,7 @@ var (
 	RSSFilePath  *string
 	DebugMode    *bool
 	GoroutineNum *int
+	DigestFile   *string
 )
 
 func TokenValid() {
@@ -34,10 +37,11 @@ func TokenValid() {
 func init() {
 	BotToken = flag.String("tg-bot", "", "Telegram bot token")
 	ChannelID = flag.Int64("tg-channel", 0, "Telegram channel id")
-	StartBy = flag.Int64("startby", 3, "Start by specified time(hour)")
+	StartBy = flag.Int64("startby", 6, "Start by specified time(hour)")
 	RSSFilePath = flag.String("rss-filepath", "rss.json", "Rss json file path")
 	DebugMode = flag.Bool("debug", false, "Debug mode")
 	GoroutineNum = flag.Int("goroutine-num", 5, "Goroutine num")
+	DigestFile = flag.String("digest-file", "digest_file.json", "digest file for deduplication")
 	flag.Parse()
 
 	TokenValid()
@@ -166,6 +170,30 @@ func makeDisplayMsg(item *gofeed.Item) string {
 	)
 }
 
+func initDeDuper() *dedup.DeDup[*gofeed.Item] {
+	deduper, err := dedup.NewDeDup(*DigestFile, func(elem *gofeed.Item) string {
+		digest := md5.Sum([]byte(elem.Title + elem.Content))
+		return fmt.Sprintf("%x", digest)
+	})
+	if err != nil {
+		panic(fmt.Errorf("new dedup err: %v", err))
+	}
+
+	return deduper
+}
+
+func initTGBot() {
+	onceLoader.Do(func() {
+		if !*DebugMode {
+			var err error
+			bot, err = tgbotapi.NewBotAPI(*BotToken)
+			if err != nil {
+				panic(err)
+			}
+		}
+	})
+}
+
 var (
 	bot        *tgbotapi.BotAPI
 	onceLoader sync.Once
@@ -176,39 +204,57 @@ var (
 func PushPost(ctx context.Context, done func()) {
 	defer done()
 
-	// init bot instance
-	onceLoader.Do(func() {
-		if !*DebugMode {
-			var err error
-			bot, err = tgbotapi.NewBotAPI(*BotToken)
-			if err != nil {
-				panic(err)
-			}
-		}
-	})
+	// init bot
+	initTGBot()
+	// init deduper
+	deduper := initDeDuper()
 
 	cnt := 0
 	for feed := range tgChan {
+		// 1. dedplicate
+		feeds := deduper.FilterMany([]*gofeed.Item{feed})
+		if len(feeds) == 0 {
+			continue
+		}
+
+		// 2. debug info
 		info := fmt.Sprintln(feed.Title, feed.Link)
 		log.Printf("%s", info)
 
-		// do not send tg when is debug mode
+		// 3. counter and sleep when condition is true
+		cnt++
+		if cnt%10 == 0 {
+			time.Sleep(1 * time.Second)
+		}
+
+		// 4. do not send tg when is debug mode
 		if *DebugMode {
 			continue
 		}
 
+		// 5. send msg
 		displayMsg := makeDisplayMsg(feed)
 		if _, err := bot.Send(tgbotapi.NewMessage(*ChannelID, displayMsg)); err != nil {
 			log.Printf("send tg err: %v\n", err)
 		}
-
-		cnt++
-		if cnt%10 == 0 {
-			time.Sleep(2 * time.Second)
-		}
 	}
 
-	// send beat package when no new msg
+	// 6. dump disk finally
+	if err := deduper.MergeAndDump(*DigestFile); err != nil {
+		log.Printf("merge and dump err: file=%s, %v", *DigestFile, err)
+	}
+
+	// 7. send alarm if need
+	alarm(cnt)
+}
+
+// alarm send beat package when no new msg
+func alarm(cnt int) {
+	log.Printf("collect article num=%d", cnt)
+
+	if *DebugMode {
+		return
+	}
 	if cnt == 0 {
 		if _, err := bot.Send(tgbotapi.NewMessage(*ChannelID, "😆only beat package, no new msg")); err != nil {
 			log.Printf("send beat err: %v\n", err)
