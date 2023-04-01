@@ -1,6 +1,6 @@
 # New 进击的 RSS
 
-### [中文说明](https://github.com/GuangzheJiang/rss_everyday/blob/main/README.md)|[English Description](https://github.com/GuangzheJiang/rss_everyday/blob/main/README_en.md)
+### [中文说明](https://github.com/youguanxinqing/rss_everyday/blob/main/README.md)|[English Description](https://github.com/youguanxinqing/rss_everyday/blob/main/README_en.md)
 
 原项目：[进击的 RSS](https://github.com/dianbanjiu/rss_everyday)。感谢 dianbanjiu。
 

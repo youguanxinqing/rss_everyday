@@ -1,6 +1,6 @@
 # New RSS_EVERYDAY
 
-### [中文说明](https://github.com/GuangzheJiang/rss_everyday/blob/main/README.md)|[English Description](https://github.com/GuangzheJiang/rss_everyday/blob/main/README_en.md)
+### [中文说明](https://github.com/youguanxinqing/rss_everyday/blob/main/README.md)|[English Description](https://github.com/youguanxinqing/rss_everyday/blob/main/README_en.md)
 
 
 Forked from ：[RSS_EVERYDAY](https://github.com/dianbanjiu/rss_everyday)。Thanks for dianbanjiu。
