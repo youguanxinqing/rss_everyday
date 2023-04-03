@@ -87,6 +87,14 @@
     {
       "title": "漩涡的博客",
       "url": "https://xuanwo.io/index.xml"
+    },
+    {
+      "title": "css-tricks",
+      "url": "https://css-tricks.com/feed/"
+    },
+    {
+      "title": "Tony Bai",
+      "url": "https://tonybai.com/feed/"
     }
   ]
 }

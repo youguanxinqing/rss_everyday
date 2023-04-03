@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"io"
 	"os"
+	"sort"
 )
 
 type DeDup[T any] struct {
@@ -66,6 +67,7 @@ func (d *DeDup[T]) MergeAndDump(filepath string) error {
 	for k := range d.newRecord {
 		list = append(list, k)
 	}
+	sort.Strings(list)
 
 	// dump data
 	content, err := json.Marshal(list)
