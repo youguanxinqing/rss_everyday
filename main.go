@@ -19,13 +19,14 @@ import (
 
 // 基础环境配置
 var (
-	BotToken     *string
-	ChannelID    *int64
-	StartBy      *int64
-	RSSFilePath  *string
-	DebugMode    *bool
-	GoroutineNum *int
-	DigestFile   *string
+	BotToken       *string
+	ChannelID      *int64
+	StartBy        *int64
+	RSSFilePath    *string
+	DebugMode      *bool
+	GoroutineNum   *int
+	DigestFile     *string
+	NoNewMsgNotify *bool
 )
 
 func TokenValid() {
@@ -42,6 +43,7 @@ func init() {
 	DebugMode = flag.Bool("debug", false, "Debug mode")
 	GoroutineNum = flag.Int("goroutine-num", 5, "Goroutine num")
 	DigestFile = flag.String("digest-file", "digest_file.json", "digest file for deduplication")
+	NoNewMsgNotify = flag.Bool("no-new-msg-notify", false, "notify when no new msg")
 	flag.Parse()
 
 	TokenValid()
@@ -255,7 +257,7 @@ func alarm(cnt int) {
 	if *DebugMode {
 		return
 	}
-	if cnt == 0 {
+	if cnt == 0 && *NoNewMsgNotify {
 		if _, err := bot.Send(tgbotapi.NewMessage(*ChannelID, "😆only beat package, no new msg")); err != nil {
 			log.Printf("send beat err: %v\n", err)
 		}
