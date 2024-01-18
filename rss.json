@@ -95,6 +95,14 @@
     {
       "title": "Tony Bai",
       "url": "https://tonybai.com/feed/"
+    },
+    {
+      "title": "stuffwithstuff",
+      "url": "https://journal.stuffwithstuff.com/rss.xml"
+    },
+    {
+      "title": "commandcenter",
+      "url": "https://commandcenter.blogspot.com/feeds/posts/default"
     }
   ]
 }
