@@ -103,6 +103,10 @@
     {
       "title": "commandcenter",
       "url": "https://commandcenter.blogspot.com/feeds/posts/default"
+    },
+    {
+      "title": "ZMonster",
+      "url": "https://www.zmonster.me/atom.xml"
     }
   ]
 }
