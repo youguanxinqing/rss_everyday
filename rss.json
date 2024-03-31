@@ -107,6 +107,10 @@
     {
       "title": "ZMonster",
       "url": "https://www.zmonster.me/atom.xml"
+    },
+    {
+      "title": "Innei",
+      "url": "https://innei.in/feed"
     }
   ]
 }
